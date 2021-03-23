@@ -21,11 +21,13 @@ import {
     const [TableName,setTableName]=useState([])
     const[SelectedTable,setSelecteTable]=useState()
     const [ColumnName,setCoulumnName]=useState([])
-    const [QueryType,setQueryType]=useState()
+    const [QueryType,setQueryType]=useState('Select')
     const [QColum,setQColum]=useState('')
     const [isEnabled, setIsEnabled] = useState(false);
 
     const[WhereColumn,setWhereColumn]=useState()
+    const[condition,setCondition]=useState()
+    const [conditionValue,setConditionValue]=useState()
 
     useEffect(() => {
       fetch('http://localhost/backend/api/values/GetDatabase')
@@ -50,7 +52,7 @@ import {
    
 const GetColumnNames=(da)=>{
 console.log('coulm name',da)
-      fetch('http://localhost:62662/api/values/GetTableColumn?table=Customer')
+      fetch('http://localhost/backend/api/values/GetTableColumn?table=Customer')
 .then(res=>res.json())
 .then((data)=>{
     console.log(data)
@@ -70,7 +72,12 @@ console.log('coulm name',da)
       
   });
   console.log(a)
-setQColum(a);
+  console.log(a.length)
+  let v=''
+  for(let i=0;i<a.length-1;i++){
+    v=v+a[i]
+  }
+setQColum(v);
  }
  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
     return(
@@ -150,7 +157,7 @@ setQColum(a);
     style={styles.dataBasePiker}
     onValueChange={(item,index)=>{
       setQueryType(item)
-      console.log(index)
+      co()
     }}>
       <Picker.Item label="Select" value="Select" style={{textAlign:'center'}}/>
       <Picker.Item label="Insert" value="insert"/>
@@ -188,7 +195,24 @@ setQColum(a);
       })
     }
 </Picker>
-
+<Text> Select Condition</Text>
+<Picker selectedValue={condition} 
+    style={styles.dataBasePiker}
+    onValueChange={(item,index)=>{
+      setCondition(item)
+      console.log(item)
+    }}>
+      <Picker.Item label=">" value=">" />
+      <Picker.Item label="<" value=">"/>
+      <Picker.Item label="=" value="="/>
+    </Picker>
+  <View>
+  <TextInput 
+    value={conditionValue}
+    placeholder="enter Condition Value"
+    style={styles.ColumnTextView}
+    />
+    </View>
        </View>
           :
           null
