@@ -7,6 +7,7 @@ import {
     TextInput,
     Button,
     TouchableOpacity,
+    Modal,
     KeyboardAvoidingView,
     ScrollView,
     Switch,CheckBox
@@ -28,6 +29,9 @@ import {
     const[WhereColumn,setWhereColumn]=useState()
     const[condition,setCondition]=useState()
     const [conditionValue,setConditionValue]=useState()
+
+    const [showModal, setShowModal] = useState(false);
+  
 
     useEffect(() => {
       fetch('http://localhost/backend/api/values/GetDatabase')
@@ -51,8 +55,9 @@ import {
     }
    
 const GetColumnNames=(da)=>{
-console.log('coulm name',da)
-      fetch('http://localhost/backend/api/values/GetTableColumn?table=Customer')
+console.log('coulm name',da.itemValue)
+const data=da.itemValue
+      fetch(`http://localhost/backend/api/values/GetTableColumn?table=${data}`)
 .then(res=>res.json())
 .then((data)=>{
     console.log(data)
@@ -78,6 +83,18 @@ console.log('coulm name',da)
     v=v+a[i]
   }
 setQColum(v);
+ }
+
+ const ShowQuery=()=>{
+   if(QueryType==='Select'){
+    let query= QueryType +' '+QColum+' '+'from'+' '+SelectedTable
+    console.log(query)
+   }
+   else if(QueryType=='insert'){
+     let query=QueryType+'into values('+QColum+')';
+     console.log(query)
+   }
+   
  }
  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
     return(
@@ -112,7 +129,7 @@ setQColum(v);
   selectedValue={SelectedTable}
   onValueChange={((itemValue, itemIndex)=>{
     setSelecteTable(itemValue)
-    GetColumnNames(itemValue)
+    GetColumnNames({itemValue})
   }
   )
   }>
@@ -219,7 +236,33 @@ setQColum(v);
       }
   </View>
 </View>
-<Button onPress={co} title="Learn More"
+
+<Modal
+          animationType={'slide'}
+          transparent={false}
+          visible={showModal}
+          onRequestClose={() => {
+            console.log('Modal has been closed.');
+          }}>
+          <View style={styles.modal}>
+            <Text style={styles.text}>Modal is open!</Text>
+            <Button
+              title="Click To Close Modal"
+              onPress={() => {
+                setShowModal(!showModal);
+                console.log(showModal)
+              }}
+            />
+          </View>
+        </Modal>
+<Button onPress={() => {
+            setShowModal(!showModal);
+            console.log(showModal)
+          }} title="Execute Query"
+  color="#841584"
+  accessibilityLabel="Learn more about this purple button"/> 
+
+<Button onPress={ShowQuery} title="Execute Query"
   color="#841584"
   accessibilityLabel="Learn more about this purple button"/> 
           </ScrollView>
@@ -278,6 +321,16 @@ width:'90%',
       width:'95%',
       marginLeft:10,
       borderBottomWidth:0.3
-    }
+    },
+    modal: {
+      flex: 1,
+      alignItems: 'center',
+      backgroundColor: '#00ff00',
+      padding: 100,
+    },
+    text: {
+      color: '#3f2949',
+      marginTop: 10,
+    },
   })
   export default QueryBuilder;
