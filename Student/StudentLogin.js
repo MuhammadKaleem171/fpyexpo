@@ -9,14 +9,14 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   ScrollView,
+  Alert
  
 } from "react-native";
 
-  function StudentLogin({navigation}) {
+  function StudentLogin(props) {
 
   const [userName,setUserName]=useState('')  
   const [password,setPassword]=useState('')
-  const [responsee,setResponse]=useState()
   const postData=()=>{
     fetch('http://192.168.10.7/backend/api/Values/post', {
       method: 'POST',
@@ -29,24 +29,32 @@ import {
         U_Password: password,
       }),
     }).then(response => response.json()) 
-    .then(json => console.log(json));
-      
+    .then(json => {
+      setResponse(json)
+      console.log(json);
+    })
+    
+      console.log(responsee)
    }
 
    const Login=()=>{
-    fetch('http://192.168.10.7/backend/api/Values/Login', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        UserName: userName,
-        U_Password: password,
-      }),
-    }).then(response => response.json()) 
-    .then(json => console.log(json));
+     console.log(props)
+   //  props.navigation.push('query')
+    fetch(`http://localhost:62662/api/values/login?userName=${userName}&password=${password}`, {
       
+    }).then(response => response.json()) 
+    .then(json => {
+      move(json)
+    })
+   
+   }
+   const move=(res)=>{
+    if(res){
+      props.navigation.push('query')  
+    }
+    else if(res==false){
+      alert('false')
+    }
    }
     return(
         <View style={{display:'flex',flex:1}}>
@@ -83,7 +91,7 @@ import {
       </ScrollView>
       </KeyboardAvoidingView >
     </View>
-    <Button onPress={()=>navigation.navigate('query')} title="Learn More"
+    <Button onPress={()=>props.navigation.navigate('query',{UserName: 1})} title="Learn More"
   color="#841584"
   accessibilityLabel="Learn more about this purple button"/> 
     <TouchableOpacity  onPress={Login}>

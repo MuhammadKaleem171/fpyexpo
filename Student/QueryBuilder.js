@@ -15,7 +15,8 @@ import {
   
   import {Picker} from '@react-native-picker/picker'
 
-  const QueryBuilder=()=>{
+  const QueryBuilder=(props)=>{
+    console.log(props)
 
     const[Database,setDatabase]=useState([])
     const[SelectedDatabase,setSelectedDatabase]=useState()
@@ -31,10 +32,13 @@ import {
     const [conditionValue,setConditionValue]=useState()
 
     const [showModal, setShowModal] = useState(false);
+    const [result,setResult]=useState([])
+
+    const [query,setQuery]=useState()
   
 
     useEffect(() => {
-      fetch('http://localhost/backend/api/values/GetDatabase')
+      fetch('http://localhost:62662/api/values/GetDatabase')
       .then(res=>res.json())
       .then((data)=>{
           setDatabase(data)
@@ -45,7 +49,7 @@ import {
     
    const GetTabeName=(item)=>{
      const database=item.itemValue
-    fetch(`http://localhost/backend/api/values/gettable?TableName=${database}`)
+    fetch(`http://localhost:62662/api/values/gettable?TableName=${database}`)
     .then(res=>res.json())
     .then((data)=>{
         console.log(data)
@@ -57,7 +61,7 @@ import {
 const GetColumnNames=(da)=>{
 console.log('coulm name',da.itemValue)
 const data=da.itemValue
-      fetch(`http://localhost/backend/api/values/GetTableColumn?table=${data}`)
+      fetch(`http://localhost:62662/api/values/GetTableColumn?table=${data}`)
 .then(res=>res.json())
 .then((data)=>{
     console.log(data)
@@ -89,12 +93,37 @@ setQColum(v);
    if(QueryType==='Select'){
     let query= QueryType +' '+QColum+' '+'from'+' '+SelectedTable
     console.log(query)
+    setQuery(query)
    }
    else if(QueryType=='insert'){
-     let query=QueryType+'into values('+QColum+')';
-     console.log(query)
+     let q=QueryType+'into values('+QColum+')';
+     setQuery(q)
    }
    
+ }
+
+ const mData=()=>{
+   const databaseName=SelectedDatabase.itemValue
+  fetch(`http://localhost:62662/api/values/ExcQuery?query=${query}&Table=${databaseName}`)
+  .then(res=>res.json())
+  .then((data)=>{
+      setResult(data[0])
+      
+      
+      result.map(m=>{
+        let va=Object.values(m)
+        for(let v of va){
+          console.log(`valuesssss${v}`)
+        }
+        for (const [key, value] of Object.entries(m)) {
+          console.log(`${key}: ${value}`);
+        }
+      })
+      
+  });       
+  
+  console.log(result)
+
  }
  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
     return(
@@ -103,9 +132,12 @@ setQColum(v);
             <View style={styles.DatabaseView}>
             <Text style={styles.heading1}>Select the Database</Text>
           <Picker style={styles.dataBasePiker}
+      
+      dropdownIconColor="#21130d" 
+      mode="dropdown"
   selectedValue={SelectedDatabase}
   onValueChange={((itemValue, itemIndex)=>{
-    setSelectedDatabase(itemValue)
+    setSelectedDatabase({itemValue})
     GetTabeName({itemValue})
   }
   )
@@ -125,7 +157,8 @@ setQColum(v);
 
 <Text style={styles.heading1}>Select Table Name </Text>
 <Picker style={styles.dataBasePiker}
-
+ dropdownIconColor="#21130d" 
+ mode="dropdown"
   selectedValue={SelectedTable}
   onValueChange={((itemValue, itemIndex)=>{
     setSelecteTable(itemValue)
@@ -170,7 +203,9 @@ setQColum(v);
   <View style={styles.QueryView}>
     <Text style={styles.heading1}> Select Query type  </Text>
 
-    <Picker selectedValue={QueryType} 
+    <Picker selectedValue={QueryType}
+     dropdownIconColor="#21130d" 
+     mode="dropdown" 
     style={styles.dataBasePiker}
     onValueChange={(item,index)=>{
       setQueryType(item)
@@ -220,7 +255,7 @@ setQColum(v);
       console.log(item)
     }}>
       <Picker.Item label=">" value=">" />
-      <Picker.Item label="<" value=">"/>
+      <Picker.Item label="<" value="<"/>
       <Picker.Item label="=" value="="/>
     </Picker>
   <View>
@@ -237,6 +272,17 @@ setQColum(v);
   </View>
 </View>
 
+
+
+
+          </ScrollView>
+
+          {/* {
+            Object.keys(result).map(key=>{
+              console.log('keu',key)
+              return(<Text> {result[key]}</Text>)
+            })
+          } */}
 <Modal
           animationType={'slide'}
           transparent={false}
@@ -245,39 +291,64 @@ setQColum(v);
             console.log('Modal has been closed.');
           }}>
           <View style={styles.modal}>
-            <Text style={styles.text}>Modal is open!</Text>
-            <Button
+          <View>
+            <View>
+              <Text>{query}</Text>
+            </View>
+  <Text>
+    Result
+  </Text>
+  <Button onPress={mData} title="Execute Query"
+  color="#841584"
+  accessibilityLabel="Learn more about this purple button"/> 
+           
+          { 
+            result.map((m,i)=>{
+              
+                return(
+                  <View key={i} style={{borderWidth:1,flexDirection:'row'}} >{
+                  Object.keys(m).map((i,index)=>(
+                  <View  key={index} style={{flexDirection:'row',display:'flex',}}>
+                    <Text > {i} : {m[i]}</Text>
+                  </View>
+                   
+                )
+                  )}
+                  </View>
+                  )
+            }
+              )
+        }
+   </View>
+ 
+          </View>
+          <Button
               title="Click To Close Modal"
               onPress={() => {
                 setShowModal(!showModal);
                 console.log(showModal)
               }}
             />
-          </View>
         </Modal>
-<Button onPress={() => {
+        <Button onPress={() => {
+          ShowQuery()
             setShowModal(!showModal);
             console.log(showModal)
-          }} title="Execute Query"
+          }} title="open Model"
   color="#841584"
   accessibilityLabel="Learn more about this purple button"/> 
 
-<Button onPress={ShowQuery} title="Execute Query"
-  color="#841584"
-  accessibilityLabel="Learn more about this purple button"/> 
-          </ScrollView>
-   
         </View>
     )
   }
 
   const styles=StyleSheet.create({
     DatabaseView:{
-flex:1,
-justifyContent:'center',
-width:'90%',
-marginTop:10,
-marginBottom:5
+      flex:1,
+      justifyContent:'center',
+      width:'90%',
+      marginTop:10,
+      marginLeft:20
     },
     heading1:{
 fontSize:18,
@@ -287,11 +358,13 @@ color:'#fb5b5a',
 fontWeight:'600'
     },
     dataBasePiker:{
-      height:30,
+      borderWidth:1,
       marginTop:10,
       fontSize:16,
       marginLeft:15,
-      backgroundColor:'#fff'   
+      borderColor:'black',
+      color:'black',
+      width:'70%'
     },
     TableView:{
       flex:1,
@@ -324,9 +397,7 @@ width:'90%',
     },
     modal: {
       flex: 1,
-      alignItems: 'center',
-      backgroundColor: '#00ff00',
-      padding: 100,
+      padding: 10,
     },
     text: {
       color: '#3f2949',
