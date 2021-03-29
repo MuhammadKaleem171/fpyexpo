@@ -40,7 +40,7 @@ import {
    const Login=()=>{
      console.log(props)
    //  props.navigation.push('query')
-    fetch(`http://localhost:62662/api/values/login?userName=${userName}&password=${password}`, {
+    fetch(`http://192.168.43.193/backend/api/values/login?userName=${userName}&password=${password}`, {
       
     }).then(response => response.json()) 
     .then(json => {
@@ -85,7 +85,7 @@ import {
         />
       </View>
  
-      <TouchableOpacity style={styles.loginBtn} onPress={postData}>
+      <TouchableOpacity style={styles.loginBtn} onPress={Login}>
         <Text style={styles.loginText}>LOGIN</Text>
       </TouchableOpacity>
       </ScrollView>

@@ -16,7 +16,6 @@ import {
   import {Picker} from '@react-native-picker/picker'
 
   const QueryBuilder=(props)=>{
-    console.log(props)
 
     const[Database,setDatabase]=useState([])
     const[SelectedDatabase,setSelectedDatabase]=useState()
@@ -27,18 +26,20 @@ import {
     const [QColum,setQColum]=useState('')
     const [isEnabled, setIsEnabled] = useState(false);
 
-    const[WhereColumn,setWhereColumn]=useState()
+    const[WhereColumn,setWhereColumn]=useState('')
     const[condition,setCondition]=useState()
     const [conditionValue,setConditionValue]=useState()
 
     const [showModal, setShowModal] = useState(false);
+
+    const [inputModel,setInputModel]=useState(false);
     const [result,setResult]=useState([])
 
     const [query,setQuery]=useState()
   
 
     useEffect(() => {
-      fetch('http://localhost:62662/api/values/GetDatabase')
+      fetch('http://192.168.10.10/backend/api/values/GetDatabase')
       .then(res=>res.json())
       .then((data)=>{
           setDatabase(data)
@@ -49,7 +50,7 @@ import {
     
    const GetTabeName=(item)=>{
      const database=item.itemValue
-    fetch(`http://localhost:62662/api/values/gettable?TableName=${database}`)
+    fetch(`http://192.168.10.10/backend/api/values/gettable?TableName=${database}`)
     .then(res=>res.json())
     .then((data)=>{
         console.log(data)
@@ -61,7 +62,7 @@ import {
 const GetColumnNames=(da)=>{
 console.log('coulm name',da.itemValue)
 const data=da.itemValue
-      fetch(`http://localhost:62662/api/values/GetTableColumn?table=${data}`)
+      fetch(`http://192.168.10.10/backend/api/values/GetTableColumn?table=${data}`)
 .then(res=>res.json())
 .then((data)=>{
     console.log(data)
@@ -86,12 +87,14 @@ const data=da.itemValue
   for(let i=0;i<a.length-1;i++){
     v=v+a[i]
   }
+  
+  
 setQColum(v);
  }
 
  const ShowQuery=()=>{
    if(QueryType==='Select'){
-    let query= QueryType +' '+QColum+' '+'from'+' '+SelectedTable
+    let query= QueryType +' '+QColum+' '+'from'+' '+SelectedTable+' where '+WhereColumn+' '+condition+' '+conditionValue
     console.log(query)
     setQuery(query)
    }
@@ -103,10 +106,12 @@ setQColum(v);
  }
 
  const mData=()=>{
-   const databaseName=SelectedDatabase.itemValue
-  fetch(`http://localhost:62662/api/values/ExcQuery?query=${query}&Table=${databaseName}`)
+  const databaseName=SelectedDatabase
+  console.log('eeeeeeeeeeeeeeeeeee',databaseName)
+  fetch(`http://192.168.10.10/backend/api/values/ExcQuery?query=${query}&Table=${databaseName}`)
   .then(res=>res.json())
   .then((data)=>{
+    console.log(data)
       setResult(data[0])
       
       
@@ -123,8 +128,30 @@ setQColum(v);
   });       
   
   console.log(result)
-
  }
+
+ const Taheader=()=>{
+   if(result===undefined){
+     console.log('ffffffffff')
+   }
+   if(result.length>=1){
+   let d=Object.keys(result[0])
+   const d1 =d.filter((item,index)=>d.indexOf(item)==index)
+  return(
+<View style={{borderWidth:1,flexDirection:'row',marginTop:10}}>
+  {
+    d1.map((i,index)=>(
+      <View  key={index} style={{flexDirection:'row',display:'flex',marginRight:10}}>
+        <Text > {i}</Text>
+      </View>
+       
+    )
+      )}
+</View>
+  )
+  }
+}
+
  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
     return(
         <View style={{flex:1,backgroundColor:'#fff'}}>
@@ -137,7 +164,7 @@ setQColum(v);
       mode="dropdown"
   selectedValue={SelectedDatabase}
   onValueChange={((itemValue, itemIndex)=>{
-    setSelectedDatabase({itemValue})
+    setSelectedDatabase(itemValue)
     GetTabeName({itemValue})
   }
   )
@@ -211,6 +238,7 @@ setQColum(v);
       setQueryType(item)
       co()
     }}>
+      <Picker.Item label=" " value=" " style={{textAlign:'center'}}/>
       <Picker.Item label="Select" value="Select" style={{textAlign:'center'}}/>
       <Picker.Item label="Insert" value="insert"/>
     </Picker>
@@ -237,13 +265,14 @@ setQColum(v);
 <Picker style={styles.dataBasePiker}
   selectedValue={WhereColumn}
   onValueChange={((itemValue, itemIndex)=>{
+    console.log(itemValue)
     setWhereColumn(itemValue)
   }
   )
   }>
     { 
       ColumnName.map((item,id)=>{
-        return(  <Picker.Item  key={item.id} label={item.column} value={item.color} />)
+        return(  <Picker.Item  key={item.id} label={item.column} value={item.column} />)
       })
     }
 </Picker>
@@ -263,7 +292,7 @@ setQColum(v);
     value={conditionValue}
     placeholder="enter Condition Value"
     style={styles.ColumnTextView}
-    />
+    onChangeText={(condition) => setConditionValue(condition)}    />
     </View>
        </View>
           :
@@ -292,24 +321,23 @@ setQColum(v);
           }}>
           <View style={styles.modal}>
           <View>
-            <View>
+            <View style={{marginTop:10,marginBottom:10}}>
               <Text>{query}</Text>
             </View>
-  <Text>
-    Result
-  </Text>
   <Button onPress={mData} title="Execute Query"
   color="#841584"
   accessibilityLabel="Learn more about this purple button"/> 
-           
+          
+           { Taheader()}
           { 
+          
             result.map((m,i)=>{
               
                 return(
-                  <View key={i} style={{borderWidth:1,flexDirection:'row'}} >{
+                  <View key={i} style={{flexDirection:'row'}} >{
                   Object.keys(m).map((i,index)=>(
-                  <View  key={index} style={{flexDirection:'row',display:'flex',}}>
-                    <Text > {i} : {m[i]}</Text>
+                  <View  key={index} style={{flexDirection:'row',display:'flex',width:90}}>
+                    <Text >  {m[i]}</Text>
                   </View>
                    
                 )
@@ -321,6 +349,24 @@ setQColum(v);
         }
    </View>
  
+   <View style={{display:'flex',flex:1,flexDirection:'row'}}>
+     <View style={styles.Mbtn}>
+              <Button 
+              title="Edit"
+              onPress={() => {
+                console.log('save')
+              }}
+            />
+            </View>
+            <View style={styles.Mbtn}>
+              <Button style={{width:20}}
+              title="Save Query"
+              onPress={() => {
+               setInputModel(!inputModel)
+              }}
+            />
+            </View>
+            </View>
           </View>
           <Button
               title="Click To Close Modal"
@@ -329,15 +375,33 @@ setQColum(v);
                 console.log(showModal)
               }}
             />
+           
         </Modal>
         <Button onPress={() => {
           ShowQuery()
             setShowModal(!showModal);
-            console.log(showModal)
           }} title="open Model"
   color="#841584"
   accessibilityLabel="Learn more about this purple button"/> 
 
+<Modal
+          animationType={'slide'}
+          transparent={false}
+          visible={inputModel}
+          onRequestClose={() => {
+            console.log('Modal has been closed.');
+          }}>
+<View>
+<Button
+              title="Click To Close Modal"
+              onPress={() => {
+                setInputModel(!inputModel);
+                
+              }}
+            />
+</View>
+
+          </Modal>
         </View>
     )
   }
@@ -403,5 +467,8 @@ width:'90%',
       color: '#3f2949',
       marginTop: 10,
     },
+    Mbtn:{
+      width:150,marginTop:100,marginRight:10,
+    }
   })
   export default QueryBuilder;
