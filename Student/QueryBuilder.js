@@ -39,7 +39,7 @@ import {
   
 
     useEffect(() => {
-      fetch('http://192.168.10.10/backend/api/values/GetDatabase')
+      fetch('http://192.168.10.4/backend/api/values/GetDatabase')
       .then(res=>res.json())
       .then((data)=>{
           setDatabase(data)
@@ -50,7 +50,7 @@ import {
     
    const GetTabeName=(item)=>{
      const database=item.itemValue
-    fetch(`http://192.168.10.10/backend/api/values/gettable?TableName=${database}`)
+    fetch(`http://192.168.10.4/backend/api/values/gettable?TableName=${database}`)
     .then(res=>res.json())
     .then((data)=>{
         console.log(data)
@@ -62,7 +62,7 @@ import {
 const GetColumnNames=(da)=>{
 console.log('coulm name',da.itemValue)
 const data=da.itemValue
-      fetch(`http://192.168.10.10/backend/api/values/GetTableColumn?table=${data}`)
+      fetch(`http://192.168.10.4/backend/api/values/GetTableColumn?table=${data}`)
 .then(res=>res.json())
 .then((data)=>{
     console.log(data)
@@ -108,7 +108,7 @@ setQColum(v);
  const mData=()=>{
   const databaseName=SelectedDatabase
   console.log('eeeeeeeeeeeeeeeeeee',databaseName)
-  fetch(`http://192.168.10.10/backend/api/values/ExcQuery?query=${query}&Table=${databaseName}`)
+  fetch(`http://192.168.10.4/backend/api/values/ExcQuery?query=${query}&Table=${databaseName}`)
   .then(res=>res.json())
   .then((data)=>{
     console.log(data)
@@ -366,7 +366,20 @@ setQColum(v);
               }}
             />
             </View>
+            
             </View>
+            
+            <Button style={{width:20}}
+              title="Next page"
+              onPress={() => {
+                setShowModal(!showModal);
+
+                props.navigation.push('ExQuery',{
+                  Query:query,
+                  database:SelectedDatabase
+                })
+              }}
+            />
           </View>
           <Button
               title="Click To Close Modal"

@@ -17,6 +17,7 @@ import {NavigationContainer} from '@react-navigation/native'
  import StudentLogin from './Student/StudentLogin';
 import {createStackNavigator} from '@react-navigation/stack'
 import QueryBuilder from './Student/QueryBuilder';
+import ExecuteQuery from './Student/ExecuteQuery';
 
 
 
@@ -29,6 +30,7 @@ const My=()=>{
     <Stack1.Navigator >
       <Stack1.Screen name="Student" component={StudentLogin}/>
       <Stack1.Screen name="query" component={QueryBuilder}/>
+      <Stack1.Screen name="ExQuery" component={ExecuteQuery}/>
     </Stack1.Navigator>
   )
 
