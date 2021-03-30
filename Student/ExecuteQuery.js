@@ -17,7 +17,7 @@ const mData=()=>{
     const databaseName=props.route.params.database
     const query=props.route.params.Query
     console.log('eeeeeeeeeeeeeeeeeee',databaseName)
-    fetch(`http://192.168.10.4/backend/api/values/ExcQuery?query=${query}&Table=${databaseName}`)
+    fetch(`http://192.168.10.7/backend/api/values/ExcQuery?query=${query}&Table=${databaseName}`)
     .then(res=>res.json())
     .then((data)=>{
       console.log(data)
@@ -62,6 +62,9 @@ const Taheader=()=>{
  }
     return(
         <View>
+          <View style={{marginTop:20,marginLeft:10}}>
+            <Text style={{fontSize:16,padding:10}}> {props.route.params.Query}</Text>
+          </View>
   <Button onPress={mData} title="Execute Query"
   color="#841584"
   accessibilityLabel="Learn more about this purple button"/> 

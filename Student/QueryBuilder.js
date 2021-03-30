@@ -10,7 +10,7 @@ import {
     Modal,
     KeyboardAvoidingView,
     ScrollView,
-    Switch,CheckBox
+    Switch,CheckBox,Alert,
   } from "react-native";
   
   import {Picker} from '@react-native-picker/picker'
@@ -36,10 +36,13 @@ import {
     const [result,setResult]=useState([])
 
     const [query,setQuery]=useState()
+
+    const [getSavedQuery,setGetSavedQuery]=useState([])
+    const [Query_Name,setQuery_Name]=useState()
   
 
     useEffect(() => {
-      fetch('http://192.168.10.4/backend/api/values/GetDatabase')
+      fetch('http://192.168.10.7/backend/api/values/GetDatabase')
       .then(res=>res.json())
       .then((data)=>{
           setDatabase(data)
@@ -50,7 +53,7 @@ import {
     
    const GetTabeName=(item)=>{
      const database=item.itemValue
-    fetch(`http://192.168.10.4/backend/api/values/gettable?TableName=${database}`)
+    fetch(`http://192.168.10.7/backend/api/values/gettable?TableName=${database}`)
     .then(res=>res.json())
     .then((data)=>{
         console.log(data)
@@ -62,7 +65,7 @@ import {
 const GetColumnNames=(da)=>{
 console.log('coulm name',da.itemValue)
 const data=da.itemValue
-      fetch(`http://192.168.10.4/backend/api/values/GetTableColumn?table=${data}`)
+      fetch(`http://192.168.10.7/backend/api/values/GetTableColumn?table=${data}`)
 .then(res=>res.json())
 .then((data)=>{
     console.log(data)
@@ -108,7 +111,7 @@ setQColum(v);
  const mData=()=>{
   const databaseName=SelectedDatabase
   console.log('eeeeeeeeeeeeeeeeeee',databaseName)
-  fetch(`http://192.168.10.4/backend/api/values/ExcQuery?query=${query}&Table=${databaseName}`)
+  fetch(`http://192.168.10.7/backend/api/values/ExcQuery?query=${query}&Table=${databaseName}`)
   .then(res=>res.json())
   .then((data)=>{
     console.log(data)
@@ -128,6 +131,40 @@ setQColum(v);
   });       
   
   console.log(result)
+ }
+
+
+ const GetqueryFromDatabase=()=>{
+   console.log('clicked')
+   fetch(`http://192.168.10.7/backend/api/values/SaveQuery?UserName=17-arid-3460`)
+   .then(res=>res.json())
+   .then((response)=>{
+     console.log(response)
+     setGetSavedQuery(response)
+   }).catch((error)=>console.log('erroe',error))
+ }
+
+ const PostSavedQuery=()=>{
+   console.log('post')
+
+  fetch('http://192.168.10.7/backend/api/Values/PostQuery', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      UserName: "17-ardi-3461",
+        Query:query,
+        DatabaseName:SelectedDatabase,
+        Query_Name:Query_Name
+    }),
+  }).then(response => response.json()) 
+  .then(json => {
+    console.log(json);
+    alert(json)
+  })
+  
  }
 
  const Taheader=()=>{
@@ -347,14 +384,15 @@ setQColum(v);
             }
               )
         }
+        
    </View>
  
-   <View style={{display:'flex',flex:1,flexDirection:'row'}}>
+   <View style={{display:'flex',width:'100%',height:300}}>
      <View style={styles.Mbtn}>
               <Button 
               title="Edit"
               onPress={() => {
-                console.log('save')
+                setShowModal(!showModal);
               }}
             />
             </View>
@@ -366,10 +404,43 @@ setQColum(v);
               }}
             />
             </View>
-            
+            <View style={styles.Mbtn}>
+              <Button style={{width:20}}
+              title="Show Saved qery"
+              onPress={() => {
+               GetqueryFromDatabase()
+              }}
+            />
+            </View>
+            <View>
+          {
+            getSavedQuery.length>=1 ?
+            getSavedQuery.map((data,index)=>{
+              return(
+                <View key={index} style={{height:30,display:'flex',borderWidth:1}}>
+                  <TouchableOpacity
+                  onPress={()=>{
+                    setShowModal(!showModal);
+                props.navigation.push('ExQuery',{
+                  Query:data.Query,
+                  database:data.DatabaseName
+                })                            
+                  }}
+                  >
+                  <Text>
+                    {data.Query_Name}
+                  </Text>
+                  </TouchableOpacity>
+                  </View>
+              )
+            })
+
+            :null
+          }
+        </View>
             </View>
             
-            <Button style={{width:20}}
+            {/* <Button style={{width:20}}
               title="Next page"
               onPress={() => {
                 setShowModal(!showModal);
@@ -379,7 +450,7 @@ setQColum(v);
                   database:SelectedDatabase
                 })
               }}
-            />
+            /> */}
           </View>
           <Button
               title="Click To Close Modal"
@@ -404,10 +475,18 @@ setQColum(v);
           onRequestClose={() => {
             console.log('Modal has been closed.');
           }}>
-<View>
+<View style={{height:400,backgroundColor:'blue',justifyContent:'center'}}>
+
+  <TextInput 
+  style={{height:40,backgroundColor:'#fff',marginBottom:40,width:'80%',marginLeft:30}}
+  placeholder="Enter query Name"
+  value={Query_Name}
+  onChangeText={(Query_Name)=>setQuery_Name(Query_Name)}
+  />
 <Button
               title="Click To Close Modal"
               onPress={() => {
+                PostSavedQuery()
                 setInputModel(!inputModel);
                 
               }}
@@ -481,7 +560,7 @@ width:'90%',
       marginTop: 10,
     },
     Mbtn:{
-      width:150,marginTop:100,marginRight:10,
+      width:150,marginTop:10,marginRight:10,
     }
   })
   export default QueryBuilder;
