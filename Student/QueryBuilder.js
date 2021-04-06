@@ -361,7 +361,15 @@ setQColum(v);
             <View style={{marginTop:10,marginBottom:10}}>
               <Text>{query}</Text>
             </View>
-  <Button onPress={mData} title="Execute Query"
+  <Button onPress={()=>{
+    props.navigation.push('ExQuery',{
+      Query:query,
+      database:SelectedDatabase
+     } )
+  }
+}
+  
+  title="Execute Query"
   color="#841584"
   accessibilityLabel="Learn more about this purple button"/> 
           
